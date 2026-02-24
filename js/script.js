@@ -1,4 +1,4 @@
-// Initial Jobs Data
+
 let jobs = [
     { id: 1, company: "Mobile First Corp", pos: "React Native Developer", loc: "Remote", type: "Full-time", sal: "$130,000 - $175,000", desc: "Build cross-platform mobile applications using React Native. Work on products used by millions of users worldwide.", status: "all" },
     { id: 2, company: "WebFlow Agency", pos: "Web Designer & Developer", loc: "Los Angeles, CA", type: "Part-time", sal: "$80,000 - $120,000", desc: "Create stunning web experiences for high-profile clients. Must have portfolio and experience with modern web design trends.", status: "all" },
@@ -11,17 +11,15 @@ let jobs = [
 ];
 
 let activeTab = 'all';
-
-// Render function
 function renderUI() {
     const container = document.getElementById('jobs-container');
     const emptyState = document.getElementById('empty-state');
     const filtered = activeTab === 'all' ? jobs : jobs.filter(j => j.status === activeTab);
-
-    // Update Counts
     document.getElementById('total-count').innerText = jobs.length;
     document.getElementById('interview-count').innerText = jobs.filter(j => j.status === 'interview').length;
     document.getElementById('rejected-count').innerText = jobs.filter(j => j.status === 'rejected').length;
+    
+    
     document.getElementById('section-count').innerText = filtered.length;
 
     if (filtered.length === 0) {
@@ -31,53 +29,70 @@ function renderUI() {
     } else {
         emptyState.classList.add('hidden');
         emptyState.classList.remove('flex');
-        
-        container.innerHTML = filtered.map(job => `
-            <div class="job-card">
-                <div onclick="removeJob(${job.id})" class="delete-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+    
+        container.innerHTML = filtered.map(job => {
+            let sidebarColorClass = "";
+            if (job.status === 'interview') sidebarColorClass = "card-interview";
+            else if (job.status === 'rejected') sidebarColorClass = "card-rejected";
+
+            return `
+                <div class="job-card ${sidebarColorClass}">
+                    <div onclick="removeJob(${job.id})" class="delete-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-[#1e293b]">${job.company}</h3>
+                    <p class="text-slate-400 font-medium mb-4">${job.pos}</p>
+                    
+                    <div class="flex flex-wrap gap-4 text-slate-400 text-sm mb-1">
+                        <span>${job.loc}</span> • <span>${job.type}</span> • <span>${job.sal}</span>
+                    </div>
+
+                    <div class="badge-status uppercase">
+                        ${job.status === 'all' ? 'NOT APPLIED' : job.status}
+                    </div>
+
+                    <p class="text-slate-600 text-[15px] mb-6 leading-relaxed">${job.desc}</p>
+
+                    <div class="flex gap-4">
+                        <button onclick="updateStatus(${job.id}, 'interview')" 
+                                class="btn-custom btn-iv ${job.status === 'interview' ? 'active' : ''}">
+                            Interview
+                        </button>
+                        <button onclick="updateStatus(${job.id}, 'rejected')" 
+                                class="btn-custom btn-rj ${job.status === 'rejected' ? 'active' : ''}">
+                            Rejected
+                        </button>
+                    </div>
                 </div>
-                <h3 class="text-xl font-bold text-[#1e293b]">${job.company}</h3>
-                <p class="text-slate-400 font-medium mb-4">${job.pos}</p>
-                <div class="flex gap-4 text-slate-400 text-sm mb-1">
-                    <span>${job.loc}</span> • <span>${job.type}</span> • <span>${job.sal}</span>
-                </div>
-                <div class="badge-status uppercase">
-                    ${job.status === 'all' ? 'NOT APPLIED' : job.status}
-                </div>
-                <p class="text-slate-600 text-[15px] mb-6 leading-relaxed">${job.desc}</p>
-                <div class="flex gap-4">
-                    <button onclick="updateStatus(${job.id}, 'interview')" class="btn-custom btn-iv ${job.status === 'interview' ? 'active' : ''}">Interview</button>
-                    <button onclick="updateStatus(${job.id}, 'rejected')" class="btn-custom btn-rj ${job.status === 'rejected' ? 'active' : ''}">Rejected</button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 }
 
-// Function to handle status toggle
 function updateStatus(id, newStatus) {
     const index = jobs.findIndex(j => j.id === id);
     if (index !== -1) {
-        jobs[index].status = (jobs[index].status === newStatus) ? 'all' : newStatus;
+        if (jobs[index].status === newStatus) {
+            jobs[index].status = 'all';
+        } else {
+            jobs[index].status = newStatus;
+        }
         renderUI();
     }
 }
-
-// Function to delete a job
 function removeJob(id) {
     jobs = jobs.filter(j => j.id !== id);
     renderUI();
 }
 
-// Function to handle tab changes
 function changeTab(tab, el) {
     activeTab = tab;
-    // Highlight active tab
-    document.querySelectorAll('.custom-tab').forEach(btn => btn.classList.remove('active'));
+    const allTabs = document.querySelectorAll('.custom-tab');
+    allTabs.forEach(btn => btn.classList.remove('active'));
+
     el.classList.add('active');
+    
     renderUI();
 }
-
-// Initial render
 renderUI();
